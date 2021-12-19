@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -eufo pipefail
+
+readonly _selfName="${0##*/}"
+
+die() { printf "%s\n" "${1:-}" 1>&2l; exit 1; }
+usage() {
+  cat - <<EOF
+Usage:
+  ${_selfName} md5sum
+
+Validates STDIN with a provided md5sum, printing STDIN to STDOUT on success.
+
+  md5sum
+    The md5sum to compare STDIN contents against.
+
+  -h --help
+    Displays this help.
+
+Examples:
+  # Install docker
+  curl -sSL https://get.docker.com \\
+    | ${_selfName} "dd5da5e89bf5730e84ef5b20dc45588c" \\
+    | sh -
+EOF
+  exit 0
+}
+
+tmpFile="$(mktemp -t "")"
+cleanup(){ rm "${tmpFile}"; }
+trap exit cleanup
+
+# Variables
+targetMD5Sum=""
+
+# User param parsing
+for arg in "$@"; do
+  case "${arg}" in
+    --help | -h ) usage; ;;
+    --* | -* ) die "Invalid argument: ${arg}"; ;;
+    *)
+      if [[ -z "${targetMD5Sum}" ]]; then
+        targetMD5Sum="${arg}"
+      else
+        die "Extra argument: ${arg}"
+      fi
+      ;;
+  esac
+done
+
+# Validate
+[ -n "${targetMD5Sum}" ] \
+  || die "No md5sum string provided."
+
+
+#
+# - Do the ting -
+#
+cat - > "${tmpFile}"
+
+< "${tmpFile}" md5sum --quiet \
+  --check <(printf "%s  -" "${targetMD5Sum}") \
+  && cat "${tmpFile}"
