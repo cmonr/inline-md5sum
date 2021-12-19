@@ -27,9 +27,9 @@ EOF
   exit 0
 }
 
-tmpFile="$(mktemp -t "")"
+tmpFile="$(mktemp -t "${_selfName}XXXXXXXX")"
 cleanup(){ rm "${tmpFile}"; }
-trap exit cleanup
+trap cleanup exit
 
 # Variables
 targetMD5Sum=""
