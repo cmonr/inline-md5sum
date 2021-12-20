@@ -4,7 +4,7 @@ set -eufo pipefail
 
 readonly _selfName="${0##*/}"
 
-die() { printf "%s\n" "${1:-}" 1>&2l; exit 1; }
+die() { printf "%s\n" "${1}" 1>&2; exit 1; }
 usage() {
   cat - <<EOF
 Usage:
@@ -34,7 +34,7 @@ trap cleanup exit
 # Variables
 targetMD5Sum=""
 
-# User param parsing
+# Parse parameters
 for arg in "$@"; do
   case "${arg}" in
     --help | -h ) usage; ;;
@@ -55,7 +55,7 @@ done
 
 
 #
-# - Do the ting -
+# - Do the thing -
 #
 cat - > "${tmpFile}"
 
